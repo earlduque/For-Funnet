@@ -1,0 +1,791 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update table="sp_widget">
+    <sp_widget action="INSERT_OR_UPDATE">
+        <category>custom</category>
+        <client_script><![CDATA[function($location, spModal, $scope,$http,snRecordWatcher) {
+	/* widget controller */
+	var c = this;
+
+	c.debug = false;
+	c.latest = c.data.latest;
+
+	console.log("What are you doing here?\nHi, I guess.\n-Earl");
+
+	var required_fields = ['name','eyeColor','hairColor'];
+	c.baby_options = {};
+	c.baby_options.weight = true;
+	c.baby_options.height = true;
+	c.baby_options.eyeColor = true;
+	c.baby_options.hairColor = true;
+	c.baby_options.sex = true;
+	c.baby_options.personality = true;
+	c.baby_options.quirks = true;
+	c.baby_options.hobbies = true;
+
+	if (c.data.p1 && c.data.p2) {
+		c.p1 = c.data.p1;
+		c.p2 = c.data.p2;
+	} else {
+		c.p1 = {}; c.p2 ={};
+	}
+
+	c.saveNewParents = function() {
+		for (var i in required_fields){
+			if (!c.p1[required_fields[i]]) {spModal.alert('Missing ' + required_fields[i] + ' for Parent 1'); return;}
+			if (!c.p2[required_fields[i]]) {spModal.alert('Missing ' + required_fields[i] + ' for Parent 2'); return;}
+		}
+		console.log('save: ' + JSON.stringify(c.p1) + ' ' + JSON.stringify(c.p2));
+
+		c.data.p1 = c.p1;
+		c.data.p2 = c.p2;
+
+		c.server.update().then(function(){
+			$location.search('id=funnet&link=' + c.data.link);
+			spModal.alert("Don't forget to save this unique URL if you want to come back later");
+		})
+	}
+
+	c.updateParents = function() {
+		for (var i in required_fields){
+			if (!c.p1[required_fields[i]]) {spModal.alert('Missing ' + required_fields[i] + ' for Parent 1'); return;}
+			if (!c.p2[required_fields[i]]) {spModal.alert('Missing ' + required_fields[i] + ' for Parent 2'); return;}
+		}
+		console.log('save: ' + JSON.stringify(c.p1) + ' ' + JSON.stringify(c.p2));
+
+		c.data.p1 = c.p1;
+		c.data.p2 = c.p2;
+
+		c.server.update();
+	}
+
+	c.generateBaby = function(){
+		if (!c.submitter) {spModal.alert('Please provide your name'); return;}
+
+		c.baby = {};
+		var random = Math.random();
+		c.options_chosen = 0;
+		for (var i in c.baby_options) c.options_chosen += c.baby_options[i] ? 1 : 0;
+
+		//Sex
+		random = Math.random();
+		if (c.baby_options.sex) c.baby.Sex = random < 0.5 ? 'Male' : 'Female';
+
+		//Weight
+		if (c.baby_options.weight) {
+			var weight_mean; var weight_sd; var weight_g;
+			if (c.baby.Sex == 'Male'){
+				weight_mean = 3687.6;
+				weight_sd = 410.5;				
+			} else if (c.baby.Sex == 'Female'){
+				weight_mean = 3639.5;
+				weight_sd = 458.2;	
+			} else {
+				weight_mean = (3687.6+3639.5)/2;
+				weight_sd = (410.5+458.2)/2;	
+			}
+			var weight_sd_real = parseFloat(randn_bm());
+			weight_g = weight_mean + (weight_sd*weight_sd_real);
+			var weight_lb = Math.floor(weight_g*0.0022046);
+			var weight_oz = Math.floor((weight_g*0.0022046-weight_lb)*16);
+			console.log('weight_g: ' + weight_g + 
+									'\nweight_lb: ' + weight_lb +
+									'\nweight_oz: ' + weight_oz + 
+									'\nweight_mean: ' + weight_mean + 
+									'\nweight_sd: ' + weight_sd +
+									'\nweight_sd_real: ' + weight_sd_real);
+			c.baby.Weight = weight_lb + ' lbs ' + weight_oz + ' oz';
+		}
+
+		//Height
+		if (c.baby_options.height) {
+			var height_mean; var height_sd; var height_cm;
+			if (c.baby.Sex == 'Male'){
+				height_mean = 50.8;
+				height_sd = 1.7;				
+			} else if (c.baby.Sex == 'Female'){
+				height_mean = 50.2;
+				height_sd = 1.8;	
+			} else {
+				height_mean = (50.8+50.2)/2;
+				height_sd = (1.7+1.8)/2;	
+			}
+			var height_sd_real = parseFloat(randn_bm());
+			height_cm = height_mean + (height_sd*height_sd_real);
+			var height_ft = Math.floor(height_cm*0.032808);
+			var height_in = Math.floor((height_cm*0.032808-height_ft)*12);
+			console.log('height_cm: ' + height_cm + 
+									'\nheight_ft: ' + height_ft +
+									'\nheight_in: ' + height_in + 
+									'\nheight_mean: ' + height_mean + 
+									'\nheight_sd: ' + height_sd + 
+									'\nheight_sd_real: ' + height_sd_real);
+			c.baby.Height = height_ft + ' ft ' + height_in + ' inches';
+		}
+
+		//Eye color
+		if (c.baby_options.eyeColor){
+			var chance_brown; var chance_green; var chance_blue;
+			if (c.p1.eyeColor == 'Brown' && c.p2.eyeColor == 'Brown'){
+				chance_brown = 0.75;
+				chance_green = chance_brown + 0.1875;
+				chance_blue = chance_green + 0.0625;
+			} else if (c.p1.eyeColor == 'Green' && c.p2.eyeColor == 'Brown' ||
+								 c.p1.eyeColor == 'Brown' && c.p2.eyeColor == 'Green'){
+				chance_brown = 0.5;
+				chance_green = chance_brown + 0.375;
+				chance_blue = chance_green + 0.125;
+			} else if (c.p1.eyeColor == 'Blue' && c.p2.eyeColor == 'Brown' ||
+								 c.p1.eyeColor == 'Brown' && c.p2.eyeColor == 'Blue'){
+				chance_brown = 0.5;
+				chance_green = chance_brown + 0;
+				chance_blue = chance_green + 0.5;
+			} else if (c.p1.eyeColor == 'Green' && c.p2.eyeColor == 'Green'){
+				chance_brown = 0;
+				chance_green = chance_brown + 0.75;
+				chance_blue = chance_green + 0.25;
+			} else if (c.p1.eyeColor == 'Green' && c.p2.eyeColor == 'Blue' ||
+								 c.p1.eyeColor == 'Blue' && c.p2.eyeColor == 'Green'){
+				chance_brown = 0;
+				chance_green = chance_brown + 0.5;
+				chance_blue = chance_green + 0.5;
+			} else if (c.p1.eyeColor == 'Blue' && c.p2.eyeColor == 'Blue'){
+				chance_brown = 0;
+				chance_green = chance_brown + 0.01;
+				chance_blue = chance_green + 0.99;
+			}
+			console.log('Eyecolor:\nchance_brown: ' + (chance_brown) + 
+									'\nchance_green: ' + (chance_green-chance_brown) + 
+									'\nchance_blue: ' + (chance_blue-chance_green));
+			random = Math.random();
+			if (random < chance_brown) c.baby['Eye Color'] = 'Brown';
+			else if (random < chance_green) c.baby['Eye Color'] = 'Green';
+			else if (random < chance_blue) c.baby['Eye Color'] = 'Blue';
+		}
+
+		//Hair color
+		if (c.baby_options.hairColor){
+			var hchance_black; var hchance_brown; var hchance_blonde; var hchance_red;
+			if (c.p1.hairColor == 'Black' && c.p2.hairColor == 'Black'){
+				hchance_black = 1;
+				hchance_brown = hchance_black + 0;
+				hchance_blonde = hchance_brown + 0;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Black' && c.p2.hairColor == 'Brown' || 
+								 c.p1.hairColor == 'Brown' && c.p2.hairColor == 'Black'){
+				hchance_black = 0.5;
+				hchance_brown = hchance_black + 0.5;
+				hchance_blonde = hchance_brown + 0;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Black' && c.p2.hairColor == 'Blonde' || 
+								 c.p1.hairColor == 'Blonde' && c.p2.hairColor == 'Black'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 1;
+				hchance_blonde = hchance_brown + 0;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Black' && c.p2.hairColor == 'Red' || 
+								 c.p1.hairColor == 'Red' && c.p2.hairColor == 'Black'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 1;
+				hchance_blonde = hchance_brown + 0;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Brown' && c.p2.hairColor == 'Brown'){
+				hchance_black = 0.25;
+				hchance_brown = hchance_black + 0.5;
+				hchance_blonde = hchance_brown + 0.22;
+				hchance_red = hchance_blonde + 0.03;
+			} else if (c.p1.hairColor == 'Brown' && c.p2.hairColor == 'Blonde' || 
+								 c.p1.hairColor == 'Blonde' && c.p2.hairColor == 'Brown'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 0.5;
+				hchance_blonde = hchance_brown + 0.5;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Brown' && c.p2.hairColor == 'Red' || 
+								 c.p1.hairColor == 'Red' && c.p2.hairColor == 'Brown'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 0.5;
+				hchance_blonde = hchance_brown + 0.34;
+				hchance_red = hchance_blonde + 0.16;
+			} else if (c.p1.hairColor == 'Blonde' && c.p2.hairColor == 'Blonde'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 0;
+				hchance_blonde = hchance_brown + 1;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Blonde' && c.p2.hairColor == 'Red' || 
+								 c.p1.hairColor == 'Red' && c.p2.hairColor == 'Blonde'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 0;
+				hchance_blonde = hchance_brown + 1;
+				hchance_red = hchance_blonde + 0;
+			} else if (c.p1.hairColor == 'Red' && c.p2.hairColor == 'Red'){
+				hchance_black = 0;
+				hchance_brown = hchance_black + 0;
+				hchance_blonde = hchance_brown + 0;
+				hchance_red = hchance_blonde + 1;
+			}
+			console.log('Haircolor:\nchance_black: ' + (hchance_black) + 
+									'\nchance_brown: ' + (hchance_brown-hchance_black) + 
+									'\nchance_blonde: ' + (hchance_blonde-hchance_brown) +
+									'\nchance_red: ' + (hchance_red-hchance_blonde));
+			random = Math.random();
+			if (random < hchance_black) c.baby['Hair Color'] = 'Black';
+			else if (random < hchance_brown) c.baby['Hair Color'] = 'Brown';
+			else if (random < hchance_blonde) c.baby['Hair Color'] = 'Blonde';
+			else if (random < hchance_red) c.baby['Hair Color'] = 'Red';
+		}
+
+		//Start a sentence
+		var sentence = [];
+
+		//Personality Traits
+		if (c.baby_options.personality){
+			var pstring = 'Adventurous, Affable, Amazing, Awesome, Blithesome, Capable, Charming, Confident, Conscientious, Cultured, Dependable, Discreet, Dutiful, Encouraging, Excellent, Exuberant, Fabulous, Fair, Fantastic, Favorable, Fearless, Fortuitous, Gorgeous, Gregarious, Helpful, Humble, Imaginative, Impartial, Incredible, Independent, Ineffable, Keen, Meticulous, Mirthful, Observant, Optimistic, Outstanding, Perfect, Persistent, Precise, Propitious, Reliable, Remarkable, Rousing, Sociable, Spectacular, Splendid, Stellar, Stupendous, Super, Trusting, Trustful, Unbelievable, Upbeat, Valiant, Wondrous';
+			var parr = pstring.split(',').map(function(e){return e.trim();});
+			var traits = [];
+
+			while (traits.length == 0 || Math.random() < 0.5){
+				random = Math.random();
+				if (random < 0.33 && (c.p1.pt1 || c.p1.pt2)){
+					if (Math.random() < 0.5 && c.p1.pt1) traits.push(c.p1.pt1)
+					else traits.push(c.p1.pt2);
+					console.log('Personality trait gained from ' + c.p1.name + ' (' + random + ')');
+				} else if (random < 0.66 && (c.p2.pt1 || c.p2.pt2)){
+					if (Math.random() < 0.5 && c.p2.pt1) traits.push(c.p2.pt1);
+					else traits.push(c.p2.pt2);
+					console.log('Personality trait gained from ' + c.p2.name + ' (' + random + ')');
+				} else {
+					traits.push(parr[Math.floor(Math.random() * Math.floor(parr.length))])
+					console.log('Non-parent personality trait gained' + ' (' + random + ')');
+				}
+			}
+			var uniqueTraits = [];
+			$.each(traits, function(i, el){
+				if($.inArray(el, uniqueTraits) === -1) uniqueTraits.push(el);
+			});
+			if (uniqueTraits.length == 1) sentence.push('The baby will be ' + uniqueTraits[0]);
+			else if (uniqueTraits.length == 2) sentence.push('The baby will be ' + uniqueTraits.join(' and '));
+			else {
+				var last_trait = uniqueTraits[uniqueTraits.length-1];
+				uniqueTraits.pop();
+				sentence.push('The baby will be ' + uniqueTraits.join(', ') + ', and ' + last_trait);
+			}
+			console.log('Total traits found: '+ uniqueTraits.length);
+		}
+		
+		//Quirks
+		if (c.baby_options.quirks){
+			var qstring = 'Loves to read, Loves to chew gum, Sneezes a lot, Foody, Good with computers and technology, Snorts when laughing, Great vocabulary, Doesn\'t like bugs, Good at math, Likes to draw, Likes to write, Shy, Loves sleep, Terribly liar, Always knows what direction they are walking in, Can recite tons of lines from movies or books from memory, Photographic memory, Instrument prodigy, Afraid of heights, Afraid of spiders, Doesn\'t like swimming, Loves to swim, Outgoing, Ambidextrous, Always warm, Always cold, Loves music, Gamer, Loves animals, Prefers tea over coffee, Addicted to coffee, Can\'t stand odd numbers or numbers indivisible by 5, Likes things that are symmetrical, Fidgets out of habit, Always positive, Snores, Falls asleep easily, Great handwriting, Horrible handwriting, Overachiever, Loves to shop, Doesn\'t like shopping, Plays Dungeons and Dragons, Eats like a bird, Great dancer, Bad dancer, Laughs easily, Class clown, Great smile, Favorite holiday is Christmas, Quite the perfectionist, Loves to tinker and invent, Is pretty superstitious, Loves to play practical jokes, The class clown, Pretty forgetful, Likes to sleep-in, Morning person, Night owl, Incredibly selfless, Quite the daydreamer, Very fashionable, Forgives easily, Has a contagious laugh, Hits the gym a lot, Extremely lucky, Loves nature, Obsessed with chocolate, Loves sweets, Great cook, Bad at cooking, Likes to clean, Kind of messy, Very decisive, Indecisive, Very punctual, Secretly a superhero';
+			var qarr = qstring.split(',').map(function(e){return e.trim();});
+			var quirks = [];
+
+			while (quirks.length == 0 || Math.random() < 0.45){
+				random = Math.random();
+				if (random < 0.33 && (c.p1.q1 || c.p1.q2)){
+					if (Math.random() < 0.5 && c.p1.q1) quirks.push(c.p1.q1)
+					else quirks.push(c.p1.q2);
+					console.log('Quirk gained from ' + c.p1.name + ' (' + random + ')');
+				} else if (random < 0.66 && (c.p2.q1 || c.p2.q2)){
+					if (Math.random() < 0.5 && c.p2.q1) quirks.push(c.p2.q1);
+					else quirks.push(c.p2.q2);
+					console.log('Quirk gained from ' + c.p2.name + ' (' + random + ')');
+				} else {
+					quirks.push(qarr[Math.floor(Math.random() * Math.floor(qarr.length))])
+					console.log('Non-parent quirk gained' + ' (' + random + ')');
+				}
+			}
+			var uniqueQuirks = [];
+			$.each(quirks, function(i, el){
+				if($.inArray(el, uniqueQuirks) === -1) uniqueQuirks.push(el);
+			});
+			if (uniqueQuirks.length == 1) sentence.push('A quirk: ' + uniqueQuirks[0]);
+			else if (uniqueQuirks.length == 2) sentence.push('A couple of quirks: ' + uniqueQuirks.join(' and '));
+			else {
+				var last_quirk = uniqueQuirks[uniqueQuirks.length-1];
+				uniqueQuirks.pop();
+				sentence.push('Some quirks: ' + uniqueQuirks.join(', ') + ', and ' + last_quirk);
+			}
+			console.log('Total quirks found: '+ uniqueQuirks.length);
+		}
+		
+		//Hobbies
+		if (c.baby_options.hobbies){
+			var hstring = 'Crocheting, Knitting, Quilting, Sewing, Reading, Gaming, Baking, Beatboxing, Bowling, Calligraphy, Candle making, Coloring, Computer programming, Cooking, Creative writing, Cross-stitch, Woodburning, Dancing, Drawing, Embroidery, Fashion, Flower arranging, Learning foreign languages, Building furniture, Ice skating, Karate, Learning magic tricks, Metalworking, Model building, Needlepoint, Origami, Painting, Photography, Playing a musical instrument, Pottery, Puzzles, Rapping, Singing, Scrapbooking, Stand-up comedy, Stamp collecting, Ping-pong, Whittling, Writing, Yo-yoing, Yoga, Archery, Astronomy, Backpacking, Baseball, Basketball, Beekeeping, Bird watching, Camping, Fishing, Gardening, Ultimate frisbee, Geocaching, Handball, Hiking, Horseback riding, Skating, Running, Kayaking, Flying kites, Longboarding, Martial arts, Meteorology, Biking, Paintball, Parkour, Rock climbing, Sailing, Scuba diving, Shopping, Skiing, Snowboarding, Soccer, Softball, Surfing, Swimming, Traveling, Volleyball, Water polo, Go-Karting, Football, Badminton, Gymnastics';
+			var harr = hstring.split(',').map(function(e){return e.trim();});
+			var hobbies = [];
+
+			while (hobbies.length == 0 || Math.random() < 0.35){
+				random = Math.random();
+				if (random < 0.33 && (c.p1.h1 || c.p1.h2)){
+					if (Math.random() < 0.5 && c.p1.h1) hobbies.push(c.p1.h1)
+					else hobbies.push(c.p1.h2);
+					console.log('hobby gained from ' + c.p1.name + ' (' + random + ')');
+				} else if (random < 0.66 && (c.p2.h1 || c.p2.h2)){
+					if (Math.random() < 0.5 && c.p2.h1) hobbies.push(c.p2.h1);
+					else hobbies.push(c.p2.h2);
+					console.log('hobby gained from ' + c.p2.name + ' (' + random + ')');
+				} else {
+					hobbies.push(harr[Math.floor(Math.random() * Math.floor(harr.length))])
+					console.log('Non-parent hobby gained' + ' (' + random + ')');
+				}
+			}
+			var uniquehobbies = [];
+			$.each(hobbies, function(i, el){
+				if($.inArray(el, uniquehobbies) === -1) uniquehobbies.push(el);
+			});
+			if (uniquehobbies.length == 1) sentence.push('A hobby: ' + uniquehobbies[0]);
+			else if (uniquehobbies.length == 2) sentence.push('A couple of hobbies: ' + uniquehobbies.join(' and '));
+			else {
+				var last_hobby = uniquehobbies[uniquehobbies.length-1];
+				uniquehobbies.pop();
+				sentence.push('Some hobbies: ' + uniquehobbies.join(', ') + ', and ' + last_hobby);
+			}
+			console.log('Total hobbies found: '+ uniquehobbies.length);
+		}
+
+		//End the sentence
+		c.baby['About the baby'] = sentence.join('. ');
+
+
+		console.log('Options chosen: ' + c.options_chosen);
+
+		if (c.options_chosen > 0){
+			c.baby.Submitter = c.submitter;
+			c.data.baby = c.baby;
+			var new_baby = [];
+			for (var j in c.baby){
+				new_baby.push(j+': '+c.baby[j]);
+			}
+			new_baby.push('This was generated at http://funnet.yayduque.com');
+			new_baby.push(c.p1.name + ' and ' + c.p2.name + ' link: http://funnet.yayduque.com/?link=' + c.data.link )
+			c.new_baby = new_baby.join('\n');
+			c.server.update().then(function(){
+				c.data.baby = null;
+				c.copyText();
+			})
+		}
+	}
+
+	c.copyText = function(){
+		var copyText = document.getElementById("copyText");
+		copyText.select();
+		copyText.setSelectionRange(0, 99999); /*For mobile devices*/
+
+		/* Copy the text inside the text field */
+		document.execCommand("copy");
+	}
+	
+	c.newParents = function(){
+		spModal.confirm('Are you sure you want to start over?').then(function(confirmed){
+			if (confirmed) $location.search('id=funnet');
+			else return;
+		});
+	}
+
+	snRecordWatcher.initList('x_snc_for_funnet_data','type=baby');
+	$scope.$on('record.updated', function(name, data) {
+		var new_entry = JSON.parse(data.record.data.value);
+		new_entry.Parents = data.record.link.display_value.replace('Link for ', '');
+		c.latest.pop();
+		c.latest.unshift(new_entry);
+		setTimeout(function(){
+			var element = document.getElementById("babytile0");
+			element.classList.remove("bounce");
+			element.classList.add("bounce");
+		},5000);
+	});
+
+	//Picking a standard deviation:
+	function randn_bm(){
+		var u = 0, v = 0;
+		while(u === 0) u = Math.random(); //Converting [0,1) to (0,1)
+		while(v === 0) v = Math.random();
+		return Math.sqrt( -2.0 * Math.log( u ) ) * Math.cos( 2.0 * Math.PI * v );
+	}
+
+}]]></client_script>
+        <controller_as>c</controller_as>
+        <css>.main-window{
+  padding: 9.5px;
+  margin: 0 0 10px;
+  font-size: 13px;
+  line-height: 1.42857;
+  color: #3a3f51;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.baby-window{
+  padding: 19.5px;
+}
+
+.baby-tiles{
+  padding: 9.5px;
+  margin: 10px 0 10px;
+  font-size: 13px;
+  line-height: 1.42857;
+  color: #3a3f51;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+.col-md-3, .col-sm-4, .col-xs-6 {
+  float: none;
+  display: inline-block;
+}</css>
+        <data_table>sp_instance</data_table>
+        <demo_data/>
+        <description/>
+        <docs/>
+        <field_list/>
+        <has_preview>true</has_preview>
+        <id>funnet</id>
+        <internal>false</internal>
+        <link><![CDATA[function link(scope, element, attrs, controller) {  }]]></link>
+        <name>funnet</name>
+        <option_schema/>
+        <public>true</public>
+        <roles/>
+        <script><![CDATA[(function() {
+  /* populate the 'data' object */
+  /* e.g., data.table = $sp.getValue('table'); */
+	data.link = $sp.getParameter('link') || '';
+	data.new_record = !data.link ? true : false;
+	data.title = 'Baby Predictions - Need new parent data';
+	
+	if (input && input.p1 && input.p2 && data.new_record){
+		data.p1 = input.p1;
+		data.p2 = input.p2;
+		
+		//Create new link record
+		var new_link_gr = new GlideRecord('x_snc_for_funnet_data');
+		new_link_gr.newRecord();
+		var new_link_data = [data.p1, data.p2];
+		new_link_gr.setValue('data', JSON.stringify(new_link_data));
+		new_link_gr.setValue('type', 'link');
+		data.link = new_link_gr.insert();
+	}
+	
+	if (input && input.p1 && input.p2 && !data.new_record){
+		data.p1 = input.p1;
+		data.p2 = input.p2;
+		
+		//Update link record
+		var update_link_gr = new GlideRecord('x_snc_for_funnet_data');
+		update_link_gr.get(data.link);
+		var update_link_data = [data.p1, data.p2];
+		update_link_gr.setValue('data',JSON.stringify(update_link_data));
+		update_link_gr.update();
+	}
+	
+	if (!data.new_record) {
+		var link_gr = new GlideRecord('x_snc_for_funnet_data');
+		if (link_gr.get(data.link)){
+			var link_data = JSON.parse(link_gr.getValue('data'));
+			data.p1 = link_data[0];
+			data.p2 = link_data[1];
+			data.title = data.p1.name + ' and ' + data.p2.name + ' Baby Predictions!';
+		} else {
+			data.title = 'Invalid URL';
+		}
+	}
+	
+	data.exclude_baby = '';
+	if (input && input.baby){
+		input.baby.Submitted = new GlideDateTime().getDisplayValue();
+		var baby_gr = new GlideRecord('x_snc_for_funnet_data');
+		baby_gr.newRecord();
+		baby_gr.setValue('link', data.link);
+		baby_gr.setValue('data', JSON.stringify(input.baby));
+		baby_gr.setValue('type', 'baby');
+		data.exclude_baby = baby_gr.insert();
+	}
+	
+	var latest_gr = new GlideRecord('x_snc_for_funnet_data');
+	latest_gr.addQuery('type','baby');
+	if (data.exclude_baby != '') latest_gr.addEncodedQuery('sys_id!=' + data.exclude_baby);
+	latest_gr.setLimit('12');
+	latest_gr.orderByDesc('sys_created_on');
+	latest_gr.query();
+	data.latest = [];
+	while (latest_gr.next()){
+		var last_data = JSON.parse(latest_gr.getValue('data'))
+		last_data.Parents = latest_gr.link.short_description.replace('Link for ', '');
+		data.latest.push(last_data);
+	}
+	
+})();]]></script>
+        <servicenow>false</servicenow>
+        <sys_class_name>sp_widget</sys_class_name>
+        <sys_created_by>admin-eduque</sys_created_by>
+        <sys_created_on>2019-10-08 23:38:46</sys_created_on>
+        <sys_id>1a673e36db1440d09c042095ca9619a5</sys_id>
+        <sys_mod_count>309</sys_mod_count>
+        <sys_name>funnet</sys_name>
+        <sys_package display_value="For Funnet" source="x_snc_for_funnet">323195aadb5400d09c042095ca961926</sys_package>
+        <sys_policy/>
+        <sys_scope display_value="For Funnet">323195aadb5400d09c042095ca961926</sys_scope>
+        <sys_update_name>sp_widget_1a673e36db1440d09c042095ca9619a5</sys_update_name>
+        <sys_updated_by>admin-eduque</sys_updated_by>
+        <sys_updated_on>2019-10-10 23:59:01</sys_updated_on>
+        <template><![CDATA[<head>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
+</head>
+<div class="main-window">
+  <div>
+    <div class="lead">
+      {{data.title}}
+    </div>
+    <div class="row">
+      <div class="col-xs-12 col-sm-6">
+        <div>
+          <b>Parent 1</b>:
+        </div>
+        <div>
+          <form>
+            <div class="form-group">
+              <label for="p1name">Name</label>
+              <input type="text" class="form-control" placeholder="John Doe"
+                     id="p1name" ng-model="c.p1.name" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p1eyeColor">{{c.p1.name}} Eye Color<span ng-if="!data.new_record">: {{c.p1.eyeColor}}</span></label>
+              <!--<input type="text" class="form-control" placeholder=""
+id="p1eyeColor" ng-model="c.p1.eyeColor">-->
+              <select name="cars" id="p1eyeColor" ng-model="c.p1.eyeColor" ng-if="data.new_record">
+                <option value="Brown">Brown</option>
+                <option value="Green">Green</option>
+                <option value="Blue">Blue</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="p1hairColor">{{c.p1.name}} Hair Color<span ng-if="!data.new_record">: {{c.p1.hairColor}}</span></label>
+              <!--<input type="text" class="form-control" placeholder=""
+id="p1hairColor" ng-model="c.p1.hairColor">-->
+              <select name="cars" id="p1hairColor" ng-model="c.p1.hairColor" ng-if="data.new_record">
+                <option value="Black">Black</option>
+                <option value="Brown">Brown</option>
+                <option value="Blond">Blond</option>
+                <option value="Red">Red</option>
+              </select>
+            </div>
+            <div ng-if="data.new_record">
+              The following are all optional:
+            </div>
+            <div class="form-group">
+              <label for="p1pt1" ng-if="data.new_record || (!data.new_record && c.p1.pt1)">Personality Trait 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.pt1)" class="form-control" placeholder="One word like Quiet or Upbeat"
+                     id="p1pt1" ng-model="c.p1.pt1" ng-disabled="!data.new_record">
+              <label for="p1pt2" ng-if="data.new_record || (!data.new_record && c.p1.pt2)">Personality Trait 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.pt2)" class="form-control" placeholder="One word like Funny or Warm"
+                     id="p1pt2" ng-model="c.p1.pt2" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p1q1" ng-if="data.new_record || (!data.new_record && c.p1.q1)">Quirk 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.q1)" class="form-control" placeholder="Example: Loves to read"
+                     id="p1q1" ng-model="c.p1.q1" ng-disabled="!data.new_record">
+              <label for="p1q2" ng-if="data.new_record || (!data.new_record && c.p1.q2)">Quirk 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.q2)" class="form-control" placeholder="Example: Good at math"
+                     id="p1q2" ng-model="c.p1.q2" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p1h1" ng-if="data.new_record || (!data.new_record && c.p1.h1)">Hobby 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.h1)" class="form-control" placeholder="Example: Rock climbing"
+                     id="p1h1" ng-model="c.p1.h1" ng-disabled="!data.new_record">
+              <label for="p1h2" ng-if="data.new_record || (!data.new_record && c.p1.h2)">Hobby 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p1.h2)" class="form-control" placeholder="Example: Making quilts"
+                     id="p1h2" ng-model="c.p1.h2" ng-disabled="!data.new_record">
+            </div>
+          </form>
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <div>
+          <b>Parent 2</b>:
+        </div>
+        <div>
+          <form>
+            <div class="form-group">
+              <label for="p2name">Name</label>
+              <input type="text" class="form-control" placeholder="Jane Doe"
+                     id="p1name" ng-model="c.p2.name" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p2eyeColor">{{c.p2.name}} Eye Color<span ng-if="!data.new_record">: {{c.p2.eyeColor}}</span></label>
+              <!--<input type="text" class="form-control" placeholder=""
+id="p1eyeColor" ng-model="c.p2.eyeColor">-->
+              <select name="cars" id="p2eyeColor" ng-model="c.p2.eyeColor" ng-if="data.new_record">
+                <option value="Brown">Brown</option>
+                <option value="Green">Green</option>
+                <option value="Blue">Blue</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="p2hairColor">{{c.p2.name}} Hair Color<span ng-if="!data.new_record">: {{c.p2.hairColor}}</span></label>
+              <!--<input type="text" class="form-control" placeholder=""
+id="p2hairColor" ng-model="c.p2.hairColor">-->
+              <select name="cars" id="p2hairColor" ng-model="c.p2.hairColor" ng-if="data.new_record">
+                <option value="Black">Black</option>
+                <option value="Brown">Brown</option>
+                <option value="Blond">Blond</option>
+                <option value="Red">Red</option>
+              </select>
+            </div>
+            <div ng-if="data.new_record">
+              The following are all optional:
+            </div>
+            <div class="form-group">
+              <label for="p2pt1" ng-if="data.new_record || (!data.new_record && c.p2.pt1)">Personality Trait 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.pt1)" class="form-control" placeholder="One word like Quiet or Upbeat"
+                     id="p2pt1" ng-model="c.p2.pt1" ng-disabled="!data.new_record">
+              <label for="p2pt2" ng-if="data.new_record || (!data.new_record && c.p2.pt2)">Personality Trait 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.pt2)" class="form-control" placeholder="One word like Funny or Warm"
+                     id="p2pt2" ng-model="c.p2.pt2" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p2q1" ng-if="data.new_record || (!data.new_record && c.p2.q1)">Quirk 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.q1)" class="form-control" placeholder="Example: Loves to read"
+                     id="p2q1" ng-model="c.p2.q1" ng-disabled="!data.new_record">
+              <label for="p2q2" ng-if="data.new_record || (!data.new_record && c.p2.q2)">Quirk 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.q2)" class="form-control" placeholder="Example: Good at math"
+                     id="p2q2" ng-model="c.p2.q2" ng-disabled="!data.new_record">
+            </div>
+            <div class="form-group">
+              <label for="p2h1" ng-if="data.new_record || (!data.new_record && c.p2.h1)">Hobby 1</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.h1)" class="form-control" placeholder="Example: Rock climbing"
+                     id="p2h1" ng-model="c.p2.h1" ng-disabled="!data.new_record">
+              <label for="p2h2" ng-if="data.new_record || (!data.new_record && c.p2.h2)">Hobby 2</label>
+              <input type="text" ng-if="data.new_record || (!data.new_record && c.p2.h2)" class="form-control" placeholder="Example: Making quilts"
+                     id="p2h2" ng-model="c.p2.h2" ng-disabled="!data.new_record">
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div ng-if="data.new_record">
+      <button type="button" class="btn btn-primary btn-lg btn-block" ng-click="c.saveNewParents()">Save new parent data</button>
+    </div>
+    <!--<div ng-if="!data.new_record">
+<button type="button" class="btn btn-primary btn-lg btn-block" ng-click="c.updateParents()">Start over with new parents</button>
+</div>-->
+  </div>
+</div>
+<div class="main-window" ng-if="!data.new_record">
+  <div class="lead">
+    Options:
+  </div>
+  <div class="row">
+    <div class="col-xs-12 col-sm-6">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionWeight" ng-model="c.baby_options.weight">
+        <label class="form-check-label" for="optionWeight">
+          Generate random weight
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionHeight" ng-model="c.baby_options.height">
+        <label class="form-check-label" for="optionHeight">
+          Generate random height
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionEyeColor" ng-model="c.baby_options.eyeColor">
+        <label class="form-check-label" for="optionEyeColor">
+          Generate eye color
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionHairColor" ng-model="c.baby_options.hairColor">
+        <label class="form-check-label" for="optionHairColor">
+          Generate hair color
+        </label>
+      </div>
+    </div>
+    <div class="col-xs-12 col-sm-6">
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionSex" ng-model="c.baby_options.sex">
+        <label class="form-check-label" for="optionSex">
+          Generate sex
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionPersonality" ng-model="c.baby_options.personality">
+        <label class="form-check-label" for="optionPersonality">
+          Generate personality traits
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionQuirks" ng-model="c.baby_options.quirks">
+        <label class="form-check-label" for="optionQuirks">
+          Generate quirks
+        </label>
+      </div>
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" value="" id="optionHobbies" ng-model="c.baby_options.hobbies">
+        <label class="form-check-label" for="optionHobbies">
+          Generate hobbies
+        </label>
+      </div>
+    </div>
+  </div>
+  <div>
+    <br><label for="submitter">Your name</label>
+    <input type="text" class="form-control" placeholder="{{data.p1.name}} and {{data.p2.name}}'s friend"
+           id="submitter" ng-model="c.submitter">
+    <br>
+  </div>
+  <div>
+    <button type="button" class="btn btn-primary btn-lg btn-block" ng-click="c.generateBaby()">Predict {{data.p1.name}} and {{data.p2.name}}'s new baby!</button>
+  </div>
+</div>
+<div class="main-window" ng-if="c.baby">
+  <div class="lead">
+    {{data.p1.name}} and {{data.p2.name}}'s new baby will be:
+  </div>
+  <div ng-if="c.options_chosen > 0">
+    <div class="row">
+      <div class="col-xs-12">
+        <div ng-repeat="(key, value) in c.baby">
+          {{key}}: {{value}}
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <br><br>
+        <div>
+          This has been copied to your clipboard so that you can easily paste it elsewhere (Mobile users may have to manually copy the text):
+        </div>
+        <div>
+          <textarea id="copyText" rows="8" cols="50" readonly>{{c.new_baby}}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div ng-if="c.options_chosen == 0">
+    A baby... you might want to choose some options or this app will be very boring.
+  </div>
+</div>
+<div ng-if="!data.new_record" class="main-window">
+  <button type="button" class="btn secondary btn-lg btn-block" ng-click="c.newParents()">Start over with new parents (try it yourself!)</button>
+</div>
+<div class="baby-window">
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="baby-tiles">
+        Last 12 generated babies!
+      </div>
+    </div>
+    <div ng-repeat="baby in c.latest" class="col-xs-6 col-sm-4 col-md-3 animated" id="babytile{{$index}}">
+      <div class="baby-tiles">
+        <div ng-repeat="(key, value) in baby">
+          {{key}}: {{value}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div ng-if="c.debug"><br>
+  <pre>Debug:</pre>
+  <pre>{{data}}</pre>
+  <pre>{{c}}</pre>
+</div>]]></template>
+    </sp_widget>
+</record_update>

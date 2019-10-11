@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8"?><record_update>
+    <sys_ui_list parent="" relationship="" sys_domain="global" table="x_snc_for_funnet_data" version="2" view="">
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>short_description</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>0</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>2789ee43db9c40d09c042095ca9619c7</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>type</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>1</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>ab89ee43db9c40d09c042095ca9619c7</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>data</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>2</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>2f89ee43db9c40d09c042095ca9619c7</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>data2</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>3</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>af89ee43db9c40d09c042095ca9619c7</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>link</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>4</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>2389ee43db9c40d09c042095ca9619c8</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list_element action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element>sys_created_on</element>
+            <list_id display_value="x_snc_for_funnet_data" element="NULL" name="x_snc_for_funnet_data" parent="NULL" relationship="NULL" sys_domain="global" view="Default view">e789ee43db9c40d09c042095ca9619c6</list_id>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <position>5</position>
+            <sum>false</sum>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_id>a389ee43db9c40d09c042095ca9619c8</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+        </sys_ui_list_element>
+        <sys_ui_list action="INSERT_OR_UPDATE">
+            <average_value>false</average_value>
+            <element/>
+            <max_value>false</max_value>
+            <min_value>false</min_value>
+            <name>x_snc_for_funnet_data</name>
+            <parent/>
+            <position/>
+            <relationship/>
+            <sum>false</sum>
+            <sys_class_name>sys_ui_list</sys_class_name>
+            <sys_created_by>admin-eduque</sys_created_by>
+            <sys_created_on>2019-10-09 17:16:43</sys_created_on>
+            <sys_domain>global</sys_domain>
+            <sys_domain_path>/</sys_domain_path>
+            <sys_id>e789ee43db9c40d09c042095ca9619c6</sys_id>
+            <sys_mod_count>0</sys_mod_count>
+            <sys_name>x_snc_for_funnet_data</sys_name>
+            <sys_package display_value="For Funnet" source="x_snc_for_funnet">323195aadb5400d09c042095ca961926</sys_package>
+            <sys_policy/>
+            <sys_scope display_value="For Funnet">323195aadb5400d09c042095ca961926</sys_scope>
+            <sys_update_name>sys_ui_list_x_snc_for_funnet_data_null</sys_update_name>
+            <sys_updated_by>admin-eduque</sys_updated_by>
+            <sys_updated_on>2019-10-09 17:16:43</sys_updated_on>
+            <sys_user/>
+            <view display_value="Default view" name="NULL">Default view</view>
+            <view_name/>
+        </sys_ui_list>
+    </sys_ui_list>
+</record_update>

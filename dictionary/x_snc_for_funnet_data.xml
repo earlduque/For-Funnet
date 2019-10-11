@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><database>
+    <element label="Data" max_length="40" name="x_snc_for_funnet_data" type="collection">
+        <element label="Primary Data" max_length="40000" name="data" type="string"/>
+        <element label="Secondary Data" max_length="40000" name="data2" type="string"/>
+        <element label="Link" max_length="32" name="link" reference="x_snc_for_funnet_data" type="reference"/>
+        <element display="true" label="Short Description" max_length="400" name="short_description" read_only="true" type="string"/>
+        <element label="Type" max_length="400" name="type" type="string"/>
+        <index name="index">
+            <element name="link"/>
+        </index>
+    </element>
+</database>
