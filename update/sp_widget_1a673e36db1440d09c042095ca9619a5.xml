@@ -353,8 +353,12 @@
 			for (var j in c.baby){
 				new_baby.push(j+': '+c.baby[j]);
 			}
-			new_baby.push('This was generated at http://funnet.yayduque.com');
-			new_baby.push(c.p1.name + ' and ' + c.p2.name + ' link: http://funnet.yayduque.com/?link=' + c.data.link )
+			if (c.data.link == '705ba9badb2100100fbc8742399619d8'){
+				new_baby.push('This was generated at http://baby.yayduque.com');
+			} else {
+				new_baby.push('This was generated at http://funnet.yayduque.com');
+				new_baby.push(c.p1.name + ' and ' + c.p2.name + '\'s custom link: http://funnet.yayduque.com/?link=' + c.data.link );
+			}
 			c.new_baby = new_baby.join('\n');
 			c.server.update().then(function(){
 				c.data.baby = null;
@@ -504,7 +508,7 @@
 			var link_data = JSON.parse(link_gr.getValue('data'));
 			data.p1 = link_data[0];
 			data.p2 = link_data[1];
-			data.title = data.p1.name + ' and ' + data.p2.name + ' Baby Predictions!';
+			data.title = data.p1.name + ' and ' + data.p2.name + ' Baby Predictions! (this section is read-only)';
 		} else {
 			data.title = 'Invalid URL';
 		}
@@ -540,14 +544,14 @@
         <sys_created_by>admin-eduque</sys_created_by>
         <sys_created_on>2019-10-08 23:38:46</sys_created_on>
         <sys_id>1a673e36db1440d09c042095ca9619a5</sys_id>
-        <sys_mod_count>350</sys_mod_count>
+        <sys_mod_count>354</sys_mod_count>
         <sys_name>funnet</sys_name>
         <sys_package display_value="For Funnet" source="x_snc_for_funnet">323195aadb5400d09c042095ca961926</sys_package>
         <sys_policy/>
         <sys_scope display_value="For Funnet">323195aadb5400d09c042095ca961926</sys_scope>
         <sys_update_name>sp_widget_1a673e36db1440d09c042095ca9619a5</sys_update_name>
         <sys_updated_by>admin-eduque</sys_updated_by>
-        <sys_updated_on>2019-12-03 00:36:51</sys_updated_on>
+        <sys_updated_on>2019-12-10 01:28:47</sys_updated_on>
         <template><![CDATA[<head>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css">
 </head>
@@ -692,7 +696,7 @@ id="p2hairColor" ng-model="c.p2.hairColor">-->
 </div>
 <div class="main-window" ng-if="!data.new_record" id="babyoptions">
   <div class="lead">
-    Options:
+    {{data.p1.name}} and {{data.p2.name}} Baby Prediction Options:
   </div>
   <div class="row">
     <div class="col-xs-12 col-sm-6">
